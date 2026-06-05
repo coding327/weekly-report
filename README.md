@@ -2,6 +2,8 @@
 
 > 输入你干了什么 → AI 帮你写成漂漂亮亮的周报。摸鱼神器。
 
+🔗 **线上地址：https://coding327.github.io/weekly-report/**
+
 ---
 
 ## 两个版本
