@@ -1,3 +1,6 @@
+// ========== 引用核心模块 ==========
+const WR = window.WeeklyReport;
+
 // ========== DOM ==========
 const apiKeyInput = document.getElementById('apiKey');
 const saveKeyBtn = document.getElementById('saveKeyBtn');
@@ -38,31 +41,17 @@ saveKeyBtn.addEventListener('click', () => {
   });
 });
 
-// ========== 风格 Prompt ==========
-const stylePrompts = {
-  professional: `请生成一份专业正式的周报，适合大厂风格。分为「本周完成」「下周计划」「风险与问题」「需要支持」四个板块。语言正式，每条有具体内容和量化数据。`,
-
-  casual: `请生成一份简洁干练的周报。用简短的要点列出本周工作（3-6条），每条一句话讲清楚做了什么+结果。语言简洁不废话。`,
-
-  detailed: `请生成一份详细的工作汇报。每条工作展开：背景→动作→结果→下一步。突出个人贡献和业务价值，用数据说话。`,
-
-  startup: `请生成一份互联网风格的周报。格式：🚀 Progress / 🤔 Blockers / 📅 Next Week。可适当使用emoji，突出速度和迭代。`
-};
-
 // ========== 生成 ==========
 async function generate() {
   const keywords = keywordsInput.value.trim();
   const style = styleSelect.value;
   const { apiKey } = await chrome.storage.local.get(['apiKey']);
 
-  if (!keywords) {
+  // 使用 core.js 的校验
+  const validation = WR.validate(keywords, apiKey);
+  if (!validation.valid) {
     apiStatus.className = 'api-status error';
-    apiStatus.textContent = '⚠️ 先填一下这周干了什么';
-    return;
-  }
-  if (!apiKey) {
-    apiStatus.className = 'api-status error';
-    apiStatus.textContent = '⚠️ 请先填写并保存 API Key';
+    apiStatus.textContent = '⚠️ ' + validation.errors[0].message;
     return;
   }
 
@@ -77,30 +66,26 @@ async function generate() {
   outputContent.textContent = '🤖 生成中...';
 
   try {
+    // 使用 core.js 构建 prompt 和请求体
+    const { systemPrompt, userPrompt } = WR.buildPrompt('', keywords, style);
+    const body = WR.buildRequestBody(systemPrompt, userPrompt);
+
     const response = await fetch('https://api.deepseek.com/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`
       },
-      body: JSON.stringify({
-        model: 'deepseek-chat',
-        messages: [
-          { role: 'system', content: '你是周报撰写助手。只输出周报正文，不输出解释。' },
-          { role: 'user', content: `${stylePrompts[style]}\n\n岗位：${keywords.includes('开发') ? '软件开发' : keywords.includes('产品') ? '产品经理' : '员工'}\n本周工作关键词：${keywords}\n\n请生成周报：` }
-        ],
-        temperature: 0.8,
-        max_tokens: 1500
-      })
+      body: JSON.stringify(body)
     });
 
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
-      throw new Error(err.error?.message || `请求失败 (${response.status})`);
+      throw new Error(WR.parseApiError(response.status, err));
     }
 
     const data = await response.json();
-    const result = data.choices[0].message.content.trim();
+    const result = WR.parseApiResponse(data);
 
     outputContent.className = 'output-content';
     outputContent.textContent = result;
@@ -111,7 +96,7 @@ async function generate() {
     outputContent.className = 'output-content';
     outputContent.textContent = '';
     apiStatus.className = 'api-status error';
-    apiStatus.textContent = `❌ ${error.message}`;
+    apiStatus.textContent = '❌ ' + error.message;
   } finally {
     generateBtn.disabled = false;
     btnText.style.display = 'inline';
@@ -124,7 +109,6 @@ copyBtn.addEventListener('click', async () => {
   const text = outputContent.textContent;
   if (!text) return;
   await navigator.clipboard.writeText(text);
-  // 短暂反馈
   copyBtn.textContent = '✅ 已复制';
   setTimeout(() => { copyBtn.textContent = '📋 复制'; }, 1500);
 });
