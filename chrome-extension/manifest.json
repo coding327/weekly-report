@@ -1,8 +1,11 @@
 {
   "manifest_version": 3,
-  "name": "AI 周报生成器",
+  "name": "AI 周报生成器 - 摸鱼神器",
+  "short_name": "AI 周报",
   "version": "1.0.0",
-  "description": "输入关键词，AI 帮你写周报。摸鱼神器。",
+  "description": "输入你干了什么，AI 自动帮你扩写成漂漂亮亮的周报。4 种风格，一键复制，懒人必备。",
+  "author": "coding327",
+  "homepage_url": "https://coding327.github.io/weekly-report/",
   "icons": {
     "16": "icon16.png",
     "48": "icon48.png",
