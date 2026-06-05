@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup">
+    <!-- 头部 -->
+    <header>
+      <h1>📝 AI 周报生成器</h1>
+      <span class="badge">摸鱼神器</span>
+    </header>
+
+    <!-- 设置区 -->
+    <div class="settings-row">
+      <input type="password" id="apiKey" placeholder="DeepSeek API Key" class="input-compact">
+      <button id="saveKeyBtn" class="btn-icon" title="保存 Key">💾</button>
+    </div>
+    <div class="key-status" id="keyStatus"></div>
+
+    <!-- 输入区 -->
+    <div class="form-group">
+      <div class="label-row">
+        <label for="keywords">这周做了什么？（关键词即可）</label>
+      </div>
+      <textarea id="keywords" rows="3" placeholder="例：修了登录bug、对接支付接口、写PRD、参加评审会..."></textarea>
+    </div>
+
+    <div class="form-row">
+      <select id="style">
+        <option value="casual">简洁干练</option>
+        <option value="professional">专业正式</option>
+        <option value="detailed">详细汇报</option>
+        <option value="startup">互联网风</option>
+      </select>
+      <button id="generateBtn" class="btn-generate">
+        <span class="btn-text">✨ 生成周报</span>
+        <span class="btn-loading" style="display:none;">⏳</span>
+      </button>
+    </div>
+
+    <div class="api-status" id="apiStatus"></div>
+
+    <!-- 输出区 -->
+    <div class="output-section" id="outputSection" style="display:none;">
+      <div class="output-content" id="outputContent"></div>
+      <div class="output-actions">
+        <button id="copyBtn">📋 复制</button>
+        <button id="regenerateBtn">🔄 换一版</button>
+      </div>
+    </div>
+
+    <!-- 底部 -->
+    <footer>
+      <span>🛡️ Key 仅存本地</span>
+      <span>Ctrl+Enter 快捷生成</span>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
